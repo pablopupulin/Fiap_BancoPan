@@ -4,7 +4,7 @@ public class Login
 {
     private readonly RefreshToken _refreshToken;
 
-    public Login(Guid userId, int timeToExpireInMinutes, string accesstoken)
+    public Login(Guid userId, int timeToExpireInMinutes, string accesstoken) : this()
     {
         UserId = userId;
         LoggedAt = DateTimeOffset.Now;
@@ -13,6 +13,10 @@ public class Login
 
         _refreshToken = new RefreshToken(userId, timeToExpireInMinutes * 2);
         RefreshToken = _refreshToken.Token;
+    }
+
+    public Login()
+    {
     }
 
     public Guid UserId { get; set; }

@@ -17,10 +17,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task SaveRefreshTokenAsync(RefreshToken refreshToken, DateTimeOffset expireIn,
         CancellationToken cancellationToken)
     {
-        var serialize = JsonSerializer.SerializeToUtf8Bytes(refreshToken, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var serialize = JsonSerializer.SerializeToUtf8Bytes(refreshToken);
 
         await _cache.SetAsync($"RefreshToken:{refreshToken.Token}", serialize, new DistributedCacheEntryOptions
         {
@@ -39,9 +36,6 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
         await _cache.RemoveAsync(key, cancellationToken);
 
-        return JsonSerializer.Deserialize<RefreshToken>(result, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        return JsonSerializer.Deserialize<RefreshToken>(result);
     }
 }
