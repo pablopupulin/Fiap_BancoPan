@@ -15,8 +15,10 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<ILoginRepository, LoginRepository>();
 
+        var connectionString = configuration.GetSection("MongoDb:ConnectionString").Value;
+
         serviceCollection.AddScoped<IMongoClient, MongoClient>(_ =>
-            new MongoClient(configuration.GetConnectionString("MongoDb")));
+            new MongoClient(connectionString));
 
         serviceCollection.AddHealthChecks()
             .AddMongoDb(configuration);

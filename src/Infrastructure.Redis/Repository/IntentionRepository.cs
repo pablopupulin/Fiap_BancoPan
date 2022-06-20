@@ -14,7 +14,8 @@ public class IntentionRepository : IIntentionRepository
         _cache = cache;
     }
 
-    public async Task SaveIntentionAsync(Intention intention, DateTimeOffset expireIn, CancellationToken cancellationToken)
+    public async Task SaveIntentionAsync(Intention intention, DateTimeOffset expireIn,
+        CancellationToken cancellationToken)
     {
         var serialize = JsonSerializer.SerializeToUtf8Bytes(intention);
 
@@ -27,9 +28,12 @@ public class IntentionRepository : IIntentionRepository
     public async Task<Intention?> GetIntentionAsync(Guid id, CancellationToken cancellationToken)
     {
         var result = await _cache.GetAsync(id.ToString(), cancellationToken);
-        
-        return result is null || result.Length == 0 ? 
-            null : 
-            JsonSerializer.Deserialize<Intention>(result);
+
+        if (result is null || result.Length == 0) 
+            return null;
+
+        await _cache.RemoveAsync(id.ToString(), cancellationToken);
+
+        return JsonSerializer.Deserialize<Intention>(result);
     }
 }

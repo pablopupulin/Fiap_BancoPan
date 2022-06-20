@@ -53,9 +53,9 @@ public class User
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, Name),
-            new(ClaimTypes.Email, Email),
-            new(ClaimTypes.Sid, UserId.ToString())
+            new Claim(ClaimTypes.Name, Name),
+            new Claim(ClaimTypes.Email, Email),
+            new Claim(ClaimTypes.Sid, UserId.ToString())
         };
 
         return claims;
