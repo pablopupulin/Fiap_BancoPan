@@ -9,31 +9,35 @@ public class RefreshUseCase : IRequestHandler<RefreshRequest, Notifable<RefreshR
 {
     private readonly ILoginRepository _loginRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-    public RefreshUseCase(ILoginRepository loginRepository, IUserRepository userRepository)
+    public RefreshUseCase(ILoginRepository loginRepository, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository)
     {
         _loginRepository = loginRepository;
         _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<Notifable<RefreshResponse>> Handle(RefreshRequest request, CancellationToken cancellationToken)
     {
-        var oldLogin = await _loginRepository.GetLoginAsync(request.RefreshToken);
+        var oldToken = await _refreshTokenRepository.GetRefreshTokenAsync(request.RefreshToken, cancellationToken);
 
-        if (oldLogin is null)
+        if (oldToken is null)
             return new Notifable<RefreshResponse>("Invalid Code");
 
-        if (oldLogin.ExpireIn.AddSeconds(1) > DateTimeOffset.Now)
+        if (oldToken.ExpireIn < DateTimeOffset.Now)
             return new Notifable<RefreshResponse>("Invalid Code");
 
-        var user = await _userRepository.GetUserAsync(oldLogin.UserId);
+        var user = await _userRepository.GetUserAsync(oldToken.UserId);
 
         if (user is null)
             return new Notifable<RefreshResponse>("Invalid Code");
 
         var login = user.Login();
+        var refreshToken = login.GetRefreshToken();
 
-        await _loginRepository.SaveLoginAsync(login);
+        await Task.WhenAll(_loginRepository.SaveLoginAsync(login, cancellationToken),
+            _refreshTokenRepository.SaveRefreshTokenAsync(refreshToken, refreshToken.ExpireIn, cancellationToken));
 
         var response = new RefreshResponse(login);
         return new Notifable<RefreshResponse>(response);

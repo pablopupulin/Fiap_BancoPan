@@ -14,15 +14,8 @@ public class LoginRepository: ILoginRepository
         _collection = identity.GetCollection<Login>(nameof(Login));
     }
 
-    public async Task SaveLoginAsync(Login login)
+    public async Task SaveLoginAsync(Login login, CancellationToken cancellationToken)
     {
-        await _collection.InsertOneAsync(login);
-    }
-
-    public async Task<Login?> GetLoginAsync(string refreshToken)
-    {
-        var cursor = await _collection.FindAsync(c => c.RefreshToken == refreshToken);
-
-        return await cursor.FirstOrDefaultAsync();
+        await _collection.InsertOneAsync(login, cancellationToken: cancellationToken);
     }
 }

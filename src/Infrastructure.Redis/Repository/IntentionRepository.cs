@@ -19,7 +19,7 @@ public class IntentionRepository : IIntentionRepository
     {
         var serialize = JsonSerializer.SerializeToUtf8Bytes(intention);
 
-        await _cache.SetAsync(intention.IntentionId.ToString(), serialize, new DistributedCacheEntryOptions
+        await _cache.SetAsync($"Intention:{intention.IntentionId}", serialize, new DistributedCacheEntryOptions
         {
             AbsoluteExpiration = expireIn
         }, cancellationToken);
@@ -27,12 +27,13 @@ public class IntentionRepository : IIntentionRepository
 
     public async Task<Intention?> GetIntentionAsync(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _cache.GetAsync(id.ToString(), cancellationToken);
+        var key = $"Intention:{id}";
+        var result = await _cache.GetAsync(key, cancellationToken);
 
         if (result is null || result.Length == 0) 
             return null;
 
-        await _cache.RemoveAsync(id.ToString(), cancellationToken);
+        await _cache.RemoveAsync(key, cancellationToken);
 
         return JsonSerializer.Deserialize<Intention>(result);
     }

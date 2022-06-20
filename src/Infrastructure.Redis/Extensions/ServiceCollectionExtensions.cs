@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCache(this IServiceCollection serviceCollection, IConfiguration configuration)
     {
         serviceCollection.AddScoped<IIntentionRepository, IntentionRepository>();
+        serviceCollection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         var connectionString = configuration.GetSection("Redis:ConnectionString").Value;
 

@@ -53,9 +53,9 @@ public class User
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, Name),
-            new Claim(ClaimTypes.Email, Email),
-            new Claim(ClaimTypes.Sid, UserId.ToString())
+            new(ClaimTypes.Name, Name),
+            new(ClaimTypes.Email, Email),
+            new(ClaimTypes.Sid, UserId.ToString())
         };
 
         return claims;
@@ -84,13 +84,6 @@ public class User
     {
         var expireIn = DateTimeOffset.Now.AddMinutes(1);
 
-        return new Login
-        {
-            UserId = UserId,
-            AccessToken = GetAccessToken(expireIn),
-            RefreshToken = Guid.NewGuid().ToString(),
-            ExpireIn = expireIn,
-            LoggedAt = DateTimeOffset.Now
-        };
+        return new Login(UserId, 1, GetAccessToken(expireIn));
     }
 }

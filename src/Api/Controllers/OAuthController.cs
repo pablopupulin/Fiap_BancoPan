@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.GetIntention.Models;
 using Application.UseCases.Login.Models;
+using Application.UseCases.Refresh.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +44,7 @@ public class OAuthController : ControllerBase
     [HttpPost]
     [Route("refresh")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> RefreshAsync([FromBody] LoginRequest request)
+    public async Task<IActionResult> RefreshAsync([FromBody] RefreshRequest request)
     {
         var response = await _mediator.Send(request);
 

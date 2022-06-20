@@ -9,14 +9,16 @@ public class LoginUseCase : IRequestHandler<LoginRequest, Notifable<LoginRespons
 {
     private readonly IIntentionRepository _intentionRepository;
     private readonly ILoginRepository _loginRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUserRepository _userRepository;
 
     public LoginUseCase(IIntentionRepository intentionRepository, IUserRepository userRepository,
-        ILoginRepository loginRepository)
+        ILoginRepository loginRepository, IRefreshTokenRepository refreshTokenRepository)
     {
         _intentionRepository = intentionRepository;
         _userRepository = userRepository;
         _loginRepository = loginRepository;
+        _refreshTokenRepository = refreshTokenRepository;
     }
 
     public async Task<Notifable<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
@@ -36,8 +38,11 @@ public class LoginUseCase : IRequestHandler<LoginRequest, Notifable<LoginRespons
         if (!user.ValidPasswords(possiblePasswords)) return new Notifable<LoginResponse>("Usuario ou senha invalido");
 
         var login = user.Login();
+        var refreshToken = login.GetRefreshToken();
 
-        await _loginRepository.SaveLoginAsync(login);
+        await Task.WhenAll(
+            _loginRepository.SaveLoginAsync(login, cancellationToken),
+            _refreshTokenRepository.SaveRefreshTokenAsync(refreshToken, refreshToken.ExpireIn, cancellationToken));
 
         var response = new LoginResponse(login);
 
